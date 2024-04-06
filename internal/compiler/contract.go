@@ -25,6 +25,8 @@ type (
 
 	Parser interface {
 		ParseModules(rawMods map[src.ModuleRef]RawModule) (map[src.ModuleRef]src.Module, *Error)
+		ParseFiles(modRef src.ModuleRef, pkgName string, files map[string][]byte) (map[string]src.File, *Error)
+		ParseFile(loc src.Location, bb []byte) (f src.File, err *Error)
 	}
 
 	RawModule struct {

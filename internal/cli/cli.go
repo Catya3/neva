@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,12 +13,15 @@ import (
 
 	"github.com/nevalang/neva/internal/builder"
 	"github.com/nevalang/neva/internal/compiler"
+	"github.com/nevalang/neva/internal/compiler/sourcecode"
+	"github.com/nevalang/neva/internal/compiler/sourcecode/graphviz"
 	"github.com/nevalang/neva/internal/interpreter"
 	"github.com/nevalang/neva/pkg"
 )
 
 func NewApp( //nolint:funlen
 	workdir string,
+	parser compiler.Parser,
 	bldr builder.Builder,
 	goc compiler.Compiler,
 	nativec compiler.Compiler,
@@ -27,6 +31,7 @@ func NewApp( //nolint:funlen
 ) *cli.App {
 	var (
 		target string
+		main   string
 		debug  bool
 	)
 
@@ -155,6 +160,52 @@ func NewApp( //nolint:funlen
 					}
 				},
 			},
+			{
+				Name:      "parse",
+				Usage:     "Parse a neva source file and output a Graphviz visualization",
+				Args:      true,
+				ArgsUsage: "Provide path to the executable package",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:        "main",
+						Required:    false,
+						Usage:       "Name of Main component to output",
+						Destination: &main,
+						DefaultText: "Main",
+					},
+				},
+				Action: func(cCtx *cli.Context) error {
+					inputFile, err := getInputFileFromArgs(cCtx)
+					if err != nil {
+						return err
+					}
+					f, err := os.Open(inputFile)
+					if err != nil {
+						return err
+					}
+					data, err := io.ReadAll(f)
+					if err != nil {
+						return err
+					}
+					f.Close()
+
+					loc := sourcecode.Location{
+						FileName: inputFile,
+					}
+					sf, err := parser.ParseFile(loc, data)
+					if err != (*compiler.Error)(nil) {
+						return err
+					}
+
+					var cb graphviz.ClusterBuilder
+					for name, e := range sf.Entities {
+						if err := cb.AddEntity(nil, name, e); err != nil {
+							return err
+						}
+					}
+					return cb.Build(os.Stdout)
+				},
+			},
 		},
 	}
 }
@@ -168,6 +219,16 @@ func getMainPkgFromArgs(cCtx *cli.Context) (string, error) {
 		)
 	}
 	return dirFromArg, nil
+}
+
+func getInputFileFromArgs(cCtx *cli.Context) (string, error) {
+	inputFile := cCtx.Args().First()
+	if filepath.Ext(inputFile) != ".neva" {
+		return "", errors.New(
+			`command takes a single neva input file, relative to module root (ex. "./pkg/main.neva")`,
+		)
+	}
+	return inputFile, nil
 }
 
 func createNevaMod(path string) error {

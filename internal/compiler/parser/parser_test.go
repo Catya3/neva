@@ -16,7 +16,7 @@ func TestParser_ParseFile_Comments(t *testing.T) {
 
 	p := New(false)
 
-	_, err := p.parseFile(src.Location{}, text)
+	_, err := p.ParseFile(src.Location{}, text)
 	require.True(t, err == nil)
 }
 
@@ -50,7 +50,7 @@ func TestParser_ParseFile_Directives(t *testing.T) {
 
 	p := New(false)
 
-	got, err := p.parseFile(src.Location{}, text)
+	got, err := p.ParseFile(src.Location{}, text)
 	require.True(t, err == nil)
 
 	d1 := got.Entities["C1"].Component.Directives[compiler.ExternDirective][0]
@@ -90,7 +90,7 @@ func TestParser_ParseFile_IONodes(t *testing.T) {
 
 	p := New(false)
 
-	got, err := p.parseFile(src.Location{}, text)
+	got, err := p.ParseFile(src.Location{}, text)
 	require.True(t, err == nil)
 
 	conn := got.Entities["C1"].Component.Net[0]
@@ -116,7 +116,7 @@ func TestParser_ParseFile_AnonymousNodes(t *testing.T) {
 
 	p := New(false)
 
-	got, err := p.parseFile(src.Location{}, text)
+	got, err := p.ParseFile(src.Location{}, text)
 	require.True(t, err == nil)
 
 	nodes := got.Entities["C1"].Component.Nodes
@@ -137,7 +137,7 @@ func TestParser_ParseFile_EnumLiterals(t *testing.T) {
 
 	p := New(false)
 
-	got, err := p.parseFile(src.Location{}, text)
+	got, err := p.ParseFile(src.Location{}, text)
 	require.True(t, err == nil)
 
 	enum := got.Entities["c0"].Const.Message.Enum
@@ -164,7 +164,7 @@ func TestParser_ParseFile_EnumLiteralSenders(t *testing.T) {
 
 	p := New(false)
 
-	got, err := p.parseFile(src.Location{}, text)
+	got, err := p.ParseFile(src.Location{}, text)
 	require.True(t, err == nil)
 
 	conn := got.Entities["C1"].Component.Net[0]

@@ -83,7 +83,7 @@ func (p Parser) ParseFiles(
 			PkgName:  pkgName,
 			FileName: fileName,
 		}
-		parsedFile, err := p.parseFile(loc, fileBytes)
+		parsedFile, err := p.ParseFile(loc, fileBytes)
 		if err != nil {
 			return nil, compiler.Error{Location: &loc}.Wrap(err)
 		}
@@ -93,7 +93,7 @@ func (p Parser) ParseFiles(
 	return result, nil
 }
 
-func (p Parser) parseFile(
+func (p Parser) ParseFile(
 	loc src.Location,
 	bb []byte,
 ) (f src.File, err *compiler.Error) {

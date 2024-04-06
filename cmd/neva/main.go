@@ -101,6 +101,7 @@ func main() { //nolint:funlen
 	// command-line app that can compile and interpret neva code
 	app := cli.NewApp(
 		wd,
+		prsr,
 		pkgMngr,
 		goCompiler,
 		nativeCompiler,
